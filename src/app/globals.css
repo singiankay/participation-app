@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Reusable form field styles */
+.form-field {
+  @apply h-[60px] w-full sm:w-[295px] px-4 bg-white text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent placeholder-gray-500;
+}
+
+.submit-button {
+  @apply bg-transparent text-white font-semibold h-[60px] w-full sm:w-[200px] px-6 border-2 border-white hover:bg-white hover:text-[#00b8e2] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#00b8e2];
+}
+
+/* Layout styles */
+.html-root {
+  @apply antialiased;
+}
+
+.body-root {
+  @apply antialiased;
+}
+
+/* Page component styles */
+.main-container {
+  @apply min-h-screen bg-gray-50;
+}
+
+.header-main {
+  @apply bg-[#00b8e2] h-[150px] flex items-center px-4 sm:px-[17.5%];
+}
+
+.form-container {
+  @apply flex flex-col sm:flex-row items-center gap-4 w-full;
+}
+
+.form-fields-container {
+  @apply flex flex-col sm:flex-row gap-4 w-full sm:flex-1;
+}
+
+.content-main {
+  @apply px-4 sm:px-[290px] py-12;
+}
+
+.title-section {
+  @apply text-center mb-12;
+}
+
+.main-title {
+  @apply text-3xl sm:text-4xl font-bold text-gray-800 mb-4;
+}
+
+.main-description {
+  @apply text-base sm:text-lg text-gray-600 max-w-2xl mx-auto;
+}
+
+.content-grid {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-8;
+}
+
+.card-base {
+  @apply bg-white rounded-lg shadow-md p-6;
+}
+
+.card-title {
+  @apply text-xl font-semibold text-gray-800 mb-4;
+}
+
+.card-placeholder {
+  @apply text-gray-500;
+}
