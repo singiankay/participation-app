@@ -1,37 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import ParticipationForm from "./components/ParticipationForm";
-import LoadingSpinner from "./components/LoadingSpinner";
-
-interface Participant {
-  id: string;
-  firstName: string;
-  lastName: string;
-  participation: number;
-}
+import { useState, Suspense } from "react";
+import ParticipantsList from "./components/ParticipantsList";
+import Loading from "./loading";
 
 export default function Home() {
-  const [participants, setParticipants] = useState<Participant[]>([]);
   const [showAddForm, setShowAddForm] = useState(true);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // TODO: Implement API call to fetch participants
-    // Mock data for now
-    const mockParticipants: Participant[] = [
-      { id: "1", firstName: "John", lastName: "Doe", participation: 75.5 },
-      { id: "2", firstName: "Jane", lastName: "Smith", participation: 82.3 },
-      { id: "3", firstName: "Bob", lastName: "Johnson", participation: 68.7 },
-    ];
-
-    // Simulate loading delay
-    setTimeout(() => {
-      setParticipants(mockParticipants);
-      setLoading(false);
-    }, 1000);
-  }, []);
 
   const handleAddParticipant = (participant: {
     firstName: string;
@@ -40,14 +14,6 @@ export default function Home() {
   }) => {
     // TODO: Implement API call to add participant
     console.log("Adding participant:", participant);
-
-    // For now, add to local state
-    const newParticipant: Participant = {
-      id: Date.now().toString(),
-      ...participant,
-    };
-    setParticipants((prev) => [...prev, newParticipant]);
-
     // Reset form
     setShowAddForm(false);
     setTimeout(() => setShowAddForm(true), 100);
@@ -56,7 +22,6 @@ export default function Home() {
   const handleDelete = (id: string) => {
     // TODO: Implement API call to delete participant
     console.log("Deleting participant:", id);
-    setParticipants((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleCancelAdd = () => {
@@ -64,101 +29,14 @@ export default function Home() {
     setTimeout(() => setShowAddForm(true), 100);
   };
 
-  if (loading) {
-    return <LoadingSpinner fullScreen text="Loading participants..." />;
-  }
-
-  if (showAddForm) {
-    return (
-      <ParticipationForm
-        mode="add"
-        participants={participants}
-        onSave={handleAddParticipant}
-        onCancel={handleCancelAdd}
-      />
-    );
-  }
-
   return (
-    <div className="main-container">
-      {/* Header */}
-      <header className="header-main">
-        <div className="flex items-center justify-between w-full">
-          <h1 className="text-white text-2xl font-bold">
-            Participation Management
-          </h1>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="submit-button"
-          >
-            ADD PARTICIPANT
-          </button>
-        </div>
-      </header>
-
-      {/* Body */}
-      <main className="content-main">
-        {/* Centered title and description */}
-        <div className="title-section">
-          <h1 className="main-title">PARTICIPANTS</h1>
-          <p className="main-description">
-            Manage and track participation percentages for team members. Add new
-            participants and view the distribution in real-time.
-          </p>
-        </div>
-
-        {/* Content area */}
-        <div className="content-grid">
-          {/* Left side - Participants Table */}
-          <div className="card-base">
-            <h2 className="card-title">Participation Table</h2>
-            <div className="table-container">
-              <table className="table-base">
-                <thead>
-                  <tr className="table-header">
-                    <th className="table-header-cell">Name</th>
-                    <th className="table-header-cell">Participation</th>
-                    <th className="table-header-cell">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {participants.map((participant) => (
-                    <tr key={participant.id} className="table-row">
-                      <td className="table-cell">
-                        {participant.firstName} {participant.lastName}
-                      </td>
-                      <td className="table-cell">
-                        {participant.participation}%
-                      </td>
-                      <td className="table-cell">
-                        <div className="action-buttons">
-                          <Link
-                            href={`/edit/${participant.id}`}
-                            className="action-link"
-                          >
-                            Edit
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(participant.id)}
-                            className="action-delete"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Right side - Chart placeholder */}
-          <div className="card-base">
-            <h2 className="card-title">Participation Chart</h2>
-          </div>
-        </div>
-      </main>
-    </div>
+    <Suspense fallback={<Loading />}>
+      <ParticipantsList
+        onAddParticipant={handleAddParticipant}
+        onDelete={handleDelete}
+        onCancelAdd={handleCancelAdd}
+        showAddForm={showAddForm}
+      />
+    </Suspense>
   );
 }
