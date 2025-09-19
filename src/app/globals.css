@@ -25,13 +25,17 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Reusable form field styles */
+/* form field styles */
 .form-field {
   @apply h-[60px] w-full sm:w-[295px] px-4 bg-white text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent placeholder-gray-500;
 }
 
 .submit-button {
   @apply bg-transparent text-white font-semibold h-[60px] w-full sm:w-[200px] px-6 border-2 border-white hover:bg-white hover:text-[#00b8e2] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#00b8e2];
+}
+
+.cancel-button {
+  @apply bg-gray-500 text-white font-semibold h-[60px] w-full sm:w-[150px] px-6 border-2 border-gray-500 hover:bg-gray-600 hover:border-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-[#00b8e2];
 }
 
 /* Layout styles */
@@ -90,4 +94,41 @@ body {
 
 .card-placeholder {
   @apply text-gray-500;
+}
+
+/* Table styles */
+.table-container {
+  @apply overflow-x-auto;
+}
+
+.table-base {
+  @apply w-full;
+}
+
+.table-header {
+  @apply border-b border-gray-200;
+}
+
+.table-header-cell {
+  @apply text-left py-3 px-4 font-semibold text-gray-700;
+}
+
+.table-row {
+  @apply border-b border-gray-100 hover:bg-gray-50;
+}
+
+.table-cell {
+  @apply py-3 px-4;
+}
+
+.action-buttons {
+  @apply flex gap-2;
+}
+
+.action-link {
+  @apply text-blue-600 hover:text-blue-800 text-sm font-medium;
+}
+
+.action-delete {
+  @apply text-red-600 hover:text-red-800 text-sm font-medium;
 }
