@@ -134,14 +134,14 @@ body {
 }
 
 /* Loading styles */
-.loading-spinner {
+/* .loading-spinner {
   @apply animate-spin rounded-full border-b-2 border-[#00b8e2];
-}
+} */
 
-.loading-container {
+/* .loading-container {
   @apply flex flex-col items-center justify-center p-8;
 }
 
 .loading-text {
   @apply mt-4 text-gray-600;
-}
+} */
