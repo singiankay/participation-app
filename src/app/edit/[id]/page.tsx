@@ -3,6 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import ParticipationForm from "@/app/components/ParticipationForm";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 interface Participant {
   id: string;
@@ -58,15 +59,7 @@ export default function EditPage() {
   };
 
   if (loading) {
-    return (
-      <div className="main-container">
-        <div className="content-main">
-          <div className="title-section">
-            <h1 className="main-title">Loading...</h1>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen text="Loading participant..." />;
   }
 
   if (!participant) {

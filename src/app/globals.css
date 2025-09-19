@@ -132,3 +132,16 @@ body {
 .action-delete {
   @apply text-red-600 hover:text-red-800 text-sm font-medium;
 }
+
+/* Loading styles */
+.loading-spinner {
+  @apply animate-spin rounded-full border-b-2 border-[#00b8e2];
+}
+
+.loading-container {
+  @apply flex flex-col items-center justify-center p-8;
+}
+
+.loading-text {
+  @apply mt-4 text-gray-600;
+}

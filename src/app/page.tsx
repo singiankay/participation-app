@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import ParticipationForm from "./components/ParticipationForm";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 interface Participant {
   id: string;
@@ -14,6 +15,7 @@ interface Participant {
 export default function Home() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [showAddForm, setShowAddForm] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // TODO: Implement API call to fetch participants
@@ -23,7 +25,12 @@ export default function Home() {
       { id: "2", firstName: "Jane", lastName: "Smith", participation: 82.3 },
       { id: "3", firstName: "Bob", lastName: "Johnson", participation: 68.7 },
     ];
-    setParticipants(mockParticipants);
+
+    // Simulate loading delay
+    setTimeout(() => {
+      setParticipants(mockParticipants);
+      setLoading(false);
+    }, 1000);
   }, []);
 
   const handleAddParticipant = (participant: {
@@ -56,6 +63,10 @@ export default function Home() {
     setShowAddForm(false);
     setTimeout(() => setShowAddForm(true), 100);
   };
+
+  if (loading) {
+    return <LoadingSpinner fullScreen text="Loading participants..." />;
+  }
 
   if (showAddForm) {
     return (
