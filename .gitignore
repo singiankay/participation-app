@@ -42,3 +42,10 @@ next-env.d.ts
 
 #project specific
 requirements/
+
+/src/generated/prisma
+
+# amplify
+.amplify
+amplify_outputs*
+amplifyconfiguration*
