@@ -13,18 +13,32 @@ const COLORS = [
   "#82CA9D",
   "#FFC658",
   "#FF7300",
+  "#00D4AA",
+  "#FF6B6B",
+  "#4ECDC4",
+  "#45B7D1",
+  "#96CEB4",
+  "#FFEAA7",
+  "#DDA0DD",
+  "#98D8C8",
+  "#F7DC6F",
+  "#BB8FCE",
+  "#85C1E9",
+  "#F8C471",
+  "#82E0AA",
+  "#F1948A",
+  "#85C1E9",
+  "#D7BDE2",
+  "#A9DFBF",
+  "#F9E79F",
+  "#D5A6BD",
+  "#A3E4D7",
+  "#FADBD8",
+  "#D6EAF8",
 ];
 
 export default function ParticipationChart() {
-  const { participants, loading, error } = useParticipants();
-
-  if (error) {
-    return (
-      <div>
-        <div className="p-4 text-red-500">Error: {error.message}</div>
-      </div>
-    );
-  }
+  const { participants, loading } = useParticipants();
 
   // Prepare data for pie chart
   const totalParticipation =

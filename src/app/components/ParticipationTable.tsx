@@ -6,7 +6,7 @@ import Link from "next/link";
 import DeleteModal from "./DeleteModal";
 
 export default function ParticipationTable() {
-  const { participants, loading, error, deleteParticipant } = useParticipants();
+  const { participants, loading, deleteParticipant } = useParticipants();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchFilter, setSearchFilter] = useState("");
   const [itemsPerPage, setItemsPerPage] = useState(2); // Number of participants per page
@@ -117,14 +117,6 @@ export default function ParticipationTable() {
     setIsDeleteModalOpen(false);
     setParticipantToDelete(null);
   };
-
-  if (error) {
-    return (
-      <div>
-        <div className="p-4 text-red-500">Error: {error.message}</div>
-      </div>
-    );
-  }
 
   return (
     <div>

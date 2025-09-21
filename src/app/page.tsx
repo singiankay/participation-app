@@ -13,10 +13,10 @@ export default function Home() {
     lastName: string;
     participation: number;
   }) => {
-    try {
-      await addParticipant(participant);
-    } catch (error) {
-      console.error("Error adding participant:", error);
+    const success = await addParticipant(participant);
+    if (success) {
+      // Optionally redirect or show success message
+      // The toast notification is already handled in the context
     }
   };
 

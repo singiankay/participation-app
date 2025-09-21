@@ -22,11 +22,11 @@ interface ParticipantsContextType {
   initialLoading: boolean;
   error: Error | null;
   refreshParticipants: () => Promise<void>;
-  addParticipant: (participant: Omit<Participant, "id">) => Promise<void>;
+  addParticipant: (participant: Omit<Participant, "id">) => Promise<boolean>;
   updateParticipant: (
     id: string,
     participant: Omit<Participant, "id">
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   deleteParticipant: (id: string) => Promise<void>;
 }
 
@@ -63,7 +63,9 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addParticipant = async (participant: Omit<Participant, "id">) => {
+  const addParticipant = async (
+    participant: Omit<Participant, "id">
+  ): Promise<boolean> => {
     try {
       const response = await fetch("/api/participants", {
         method: "POST",
@@ -74,7 +76,14 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add participant");
+        const errorData = await response.json();
+        if (errorData.details && Array.isArray(errorData.details)) {
+          const errorMessage = errorData.details.join(", ");
+          toast.error(errorMessage);
+          return false; // Return false for validation errors
+        }
+        toast.error(errorData.error || "Failed to add participant");
+        return false; // Return false for other errors
       }
 
       const newParticipant = await response.json();
@@ -84,17 +93,18 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
       toast.success(
         `${participant.firstName} ${participant.lastName} added successfully!`
       );
+      return true; // Return true for success
     } catch (err) {
-      setError(err as Error);
+      console.error("Error adding participant:", err);
       toast.error("Failed to add participant. Please try again.");
-      throw err;
+      return false; // Return false for exceptions
     }
   };
 
   const updateParticipant = async (
     id: string,
     participant: Omit<Participant, "id">
-  ) => {
+  ): Promise<boolean> => {
     try {
       const response = await fetch(`/api/participants/${id}`, {
         method: "PUT",
@@ -105,7 +115,15 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update participant");
+        const errorData = await response.json();
+        if (errorData.details && Array.isArray(errorData.details)) {
+          // Server-side validation errors
+          const errorMessage = errorData.details.join(", ");
+          toast.error(errorMessage);
+          return false; // Return false for validation errors
+        }
+        toast.error(errorData.error || "Failed to update participant");
+        return false; // Return false for other errors
       }
 
       const updatedParticipant = await response.json();
@@ -115,10 +133,11 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
       toast.success(
         `${participant.firstName} ${participant.lastName} updated successfully!`
       );
+      return true; // Return true for success
     } catch (err) {
-      setError(err as Error);
+      console.error("Error updating participant:", err);
       toast.error("Failed to update participant. Please try again.");
-      throw err;
+      return false; // Return false for exceptions
     }
   };
 
@@ -142,7 +161,7 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
       );
       toast.success(`${participantName} deleted successfully!`);
     } catch (err) {
-      setError(err as Error);
+      console.error("Error deleting participant:", err);
       toast.error("Failed to delete participant. Please try again.");
       throw err;
     }

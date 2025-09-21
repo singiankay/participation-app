@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { CreateParticipantDto } from "@/dto/CreateParticipantDto";
+import { validateDto } from "@/lib/validation";
+import {
+  validateParticipationTotal,
+  validateNameUniqueness,
+} from "@/lib/participationValidation";
 
 // GET /api/participants - Get all participants
 export async function GET() {
@@ -32,20 +38,60 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { firstName, lastName, participation } = body;
 
-    if (!firstName || !lastName || participation === undefined) {
+    // Validate the request data
+    const validation = await validateDto(CreateParticipantDto, body);
+
+    if (!validation.isValid) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        {
+          error: "Validation failed",
+          details: validation.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const validatedData = validation.data!;
+
+    // Validate name uniqueness
+    const uniquenessValidation = await validateNameUniqueness(
+      validatedData.firstName,
+      validatedData.lastName
+    );
+
+    if (!uniquenessValidation.isValid) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: [uniquenessValidation.error!],
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate that total participation doesn't exceed 100%
+    const participationValidation = await validateParticipationTotal(
+      validatedData.participation
+    );
+
+    if (!participationValidation.isValid) {
+      return NextResponse.json(
+        {
+          error: "Participation validation failed",
+          details: [participationValidation.error!],
+        },
         { status: 400 }
       );
     }
 
     const participant = await prisma.participant.create({
       data: {
-        firstname: firstName,
-        lastname: lastName,
-        participation: participation,
+        ...(({ firstName, lastName, participation }) => ({
+          firstname: firstName,
+          lastname: lastName,
+          participation,
+        }))(validatedData),
       },
     });
 

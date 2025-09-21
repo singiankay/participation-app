@@ -53,12 +53,15 @@ export default function EditPage({
     lastName: string;
     participation: number;
   }) => {
-    try {
-      await updateParticipant(resolvedParams.id, updatedParticipant);
+    const success = await updateParticipant(
+      resolvedParams.id,
+      updatedParticipant
+    );
+    if (success) {
+      // Only redirect on successful update
       router.push("/");
-    } catch (error) {
-      console.error("Error updating participant:", error);
     }
+    // If not successful, stay on the page to show the error
   };
 
   const handleCancel = () => {
