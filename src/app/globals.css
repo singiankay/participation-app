@@ -12,13 +12,6 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
@@ -28,6 +21,10 @@ body {
 /* form field styles */
 .form-field {
   @apply h-[60px] w-full sm:w-[295px] px-4 bg-white text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent placeholder-gray-500;
+}
+
+.form-title {
+  @apply text-2xl font-bold text-white mb-6 text-center;
 }
 
 .submit-button {
@@ -53,11 +50,11 @@ body {
 }
 
 .header-main {
-  @apply bg-[#00b8e2] h-[150px] flex items-center px-4 sm:px-[17.5%];
+  @apply bg-[#00b8e2] min-h-[150px] flex items-center px-4 sm:px-[17.5%] py-6;
 }
 
 .form-container {
-  @apply flex flex-col sm:flex-row items-center gap-4 w-full;
+  @apply flex flex-col items-center gap-4 w-full;
 }
 
 .form-fields-container {
@@ -111,4 +108,30 @@ body {
 
 .action-delete {
   @apply text-red-600 hover:text-red-800 text-sm font-medium;
+}
+
+/* Button styles */
+.btn-pagination-active {
+  @apply text-white border-[#00b8e2];
+  background-color: #00b8e2;
+}
+
+.btn-pagination-inactive {
+  @apply hover:bg-gray-50;
+  background-color: transparent;
+}
+
+.action-edit {
+  @apply font-medium;
+  color: #00b8e2;
+}
+
+/* Dropdown styles */
+.dropdown-show {
+  @apply px-2 py-1 text-sm border text-gray-600 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#00b8e2] focus:border-transparent;
+}
+
+.dropdown-show-option:hover {
+  background-color: #00b8e2;
+  color: white;
 }

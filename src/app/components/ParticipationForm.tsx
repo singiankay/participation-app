@@ -47,6 +47,11 @@ export default function ParticipationForm({
 
   return (
     <form onSubmit={handleSubmit} className="form-container">
+      {mode === "edit" && participant && (
+        <h1 className="form-title">
+          Edit Participation - {participant.firstName} {participant.lastName}
+        </h1>
+      )}
       <div className="form-fields-container">
         <input
           type="text"
