@@ -7,6 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import toast from "react-hot-toast";
 
 interface Participant {
   id: string;
@@ -80,8 +81,12 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
       setParticipants((prev) =>
         prev ? [...prev, newParticipant] : [newParticipant]
       );
+      toast.success(
+        `${participant.firstName} ${participant.lastName} added successfully!`
+      );
     } catch (err) {
       setError(err as Error);
+      toast.error("Failed to add participant. Please try again.");
       throw err;
     }
   };
@@ -107,14 +112,23 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
       setParticipants((prev) =>
         prev ? prev.map((p) => (p.id === id ? updatedParticipant : p)) : null
       );
+      toast.success(
+        `${participant.firstName} ${participant.lastName} updated successfully!`
+      );
     } catch (err) {
       setError(err as Error);
+      toast.error("Failed to update participant. Please try again.");
       throw err;
     }
   };
 
   const deleteParticipant = async (id: string) => {
     try {
+      const participantToDelete = participants?.find((p) => p.id === id);
+      const participantName = participantToDelete
+        ? `${participantToDelete.firstName} ${participantToDelete.lastName}`
+        : "Participant";
+
       const response = await fetch(`/api/participants/${id}`, {
         method: "DELETE",
       });
@@ -126,8 +140,10 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
       setParticipants((prev) =>
         prev ? prev.filter((p) => p.id !== id) : null
       );
+      toast.success(`${participantName} deleted successfully!`);
     } catch (err) {
       setError(err as Error);
+      toast.error("Failed to delete participant. Please try again.");
       throw err;
     }
   };
