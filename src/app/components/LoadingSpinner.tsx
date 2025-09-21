@@ -23,18 +23,16 @@ export default function LoadingSpinner({
 
   if (fullScreen) {
     return (
-      <div className="main-container">
-        <div className="content-main">
-          <div className="title-section">
-            <div className="flex justify-center items-center">
-              <div
-                className={`animate-spin rounded-full border-b-2 border-[#00b8e2] ${sizeClasses[size]}`}
-              ></div>
-            </div>
-            <h1 className={`main-title mt-4 ${textSizeClasses[size]}`}>
-              {text}
-            </h1>
+      <div className="min-h-screen flex items-center justify-center bg-[#00b8e2]">
+        <div className="text-center">
+          <div className="flex justify-center items-center mb-4">
+            <div
+              className={`animate-spin rounded-full border-b-2 border-white ${sizeClasses[size]}`}
+            ></div>
           </div>
+          <h1 className={`text-white font-bold ${textSizeClasses[size]}`}>
+            {text}
+          </h1>
         </div>
       </div>
     );

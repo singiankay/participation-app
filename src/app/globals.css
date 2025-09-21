@@ -101,26 +101,6 @@ body {
   @apply overflow-x-auto;
 }
 
-.table-base {
-  @apply w-full;
-}
-
-.table-header {
-  @apply border-b border-gray-200;
-}
-
-.table-header-cell {
-  @apply text-left py-3 px-4 font-semibold text-gray-700;
-}
-
-.table-row {
-  @apply border-b border-gray-100 hover:bg-gray-50;
-}
-
-.table-cell {
-  @apply py-3 px-4;
-}
-
 .action-buttons {
   @apply flex gap-2;
 }
@@ -132,16 +112,3 @@ body {
 .action-delete {
   @apply text-red-600 hover:text-red-800 text-sm font-medium;
 }
-
-/* Loading styles */
-/* .loading-spinner {
-  @apply animate-spin rounded-full border-b-2 border-[#00b8e2];
-} */
-
-/* .loading-container {
-  @apply flex flex-col items-center justify-center p-8;
-}
-
-.loading-text {
-  @apply mt-4 text-gray-600;
-} */

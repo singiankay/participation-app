@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ParticipantsProvider } from "./context/ParticipantsContext";
+import SuspenseLayout from "./components/SuspenseLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Participation Management App",
-  description: "Manage and track participation percentages for team members",
+  description: "Manage and track participation percentages",
 };
 
 export default function RootLayout({
@@ -24,10 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="html-root">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} body-root`}
-      >
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} body-root`}>
+        <ParticipantsProvider>
+          <SuspenseLayout>{children}</SuspenseLayout>
+        </ParticipantsProvider>
       </body>
     </html>
   );

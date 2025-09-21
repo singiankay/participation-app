@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useParticipants } from "../context/ParticipantsContext";
 import ParticipationForm from "./ParticipationForm";
 
 interface Participant {
@@ -11,105 +12,66 @@ interface Participant {
   participation: number;
 }
 
-// Create promises that we can throw to suspend
-let participantsPromise: Promise<Participant[]> | null = null;
-let participantPromise: Promise<Participant> | null = null;
-
-function getParticipantsPromise(): Promise<Participant[]> {
-  if (!participantsPromise) {
-    participantsPromise = new Promise((resolve) => {
-      setTimeout(() => {
-        const mockParticipants: Participant[] = [
-          { id: "1", firstName: "John", lastName: "Doe", participation: 75.5 },
-          {
-            id: "2",
-            firstName: "Jane",
-            lastName: "Smith",
-            participation: 82.3,
-          },
-          {
-            id: "3",
-            firstName: "Bob",
-            lastName: "Johnson",
-            participation: 68.7,
-          },
-        ];
-        resolve(mockParticipants);
-      }, 500);
-    });
-  }
-  return participantsPromise;
-}
-
-function getParticipantPromise(id: string): Promise<Participant> {
-  if (!participantPromise) {
-    participantPromise = new Promise((resolve) => {
-      setTimeout(() => {
-        const mockParticipant: Participant = {
-          id: id,
-          firstName: "John",
-          lastName: "Doe",
-          participation: 75.5,
-        };
-        resolve(mockParticipant);
-      }, 500);
-    });
-  }
-  return participantPromise;
-}
-
-// Custom hook that suspends
+// Custom hook that fetches specific participant data
 function useParticipantData() {
-  const [participants, setParticipants] = useState<Participant[] | null>(null);
+  const { participants } = useParticipants();
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [promise, setPromise] = useState<Promise<
-    [Participant[], Participant]
-  > | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id =
-      params.get("id") || window.location.pathname.split("/").pop() || "1";
+    const fetchParticipant = async () => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams(window.location.search);
+        const id =
+          params.get("id") || window.location.pathname.split("/").pop() || "1";
 
-    const currentPromise = Promise.all([
-      getParticipantsPromise(),
-      getParticipantPromise(id),
-    ]);
-    setPromise(currentPromise);
+        const response = await fetch(`/api/participants/${id}`);
 
-    currentPromise
-      .then(([participantsData, participantData]) => {
-        setParticipants(participantsData);
+        if (!response.ok) {
+          throw new Error("Failed to fetch participant data");
+        }
+
+        const participantData = await response.json();
         setParticipant(participantData);
-        setPromise(null);
-      })
-      .catch((err) => {
-        setError(err);
-        setPromise(null);
-      });
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchParticipant();
   }, []);
 
   if (error) throw error;
-  if (promise) throw promise; // This will suspend with the actual running promise
+  if (loading) {
+    // Return a promise to suspend
+    throw new Promise(() => {});
+  }
 
   return { participants, participant };
 }
 
 export default function EditParticipant() {
   const router = useRouter();
-  const { participants, participant } = useParticipantData();
+  const { participant } = useParticipantData();
+  const { updateParticipant } = useParticipants();
 
-  const handleSave = (updatedParticipant: {
+  const handleSave = async (updatedParticipant: {
     firstName: string;
     lastName: string;
     participation: number;
   }) => {
-    // TODO: Implement API call to update participant
-    console.log("Updating participant:", updatedParticipant);
-
-    // For now, just redirect to home
-    router.push("/");
+    try {
+      await updateParticipant(participant?.id || "", updatedParticipant);
+      // Redirect to home after successful update
+      router.push("/");
+    } catch (error) {
+      console.error("Error updating participant:", error);
+      // You might want to show an error message to the user here
+    }
   };
 
   const handleCancel = () => {
@@ -141,7 +103,6 @@ export default function EditParticipant() {
     <ParticipationForm
       mode="edit"
       participant={participant}
-      participants={participants ?? undefined}
       onSave={handleSave}
       onCancel={handleCancel}
     />

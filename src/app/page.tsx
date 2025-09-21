@@ -1,42 +1,36 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import ParticipantsList from "./components/ParticipantsList";
-import Loading from "./loading";
+import { useRouter } from "next/navigation";
+import { useParticipants } from "./context/ParticipantsContext";
+import ParticipationForm from "./components/ParticipationForm";
 
 export default function Home() {
-  const [showAddForm, setShowAddForm] = useState(true);
+  const router = useRouter();
+  const { addParticipant } = useParticipants();
 
-  const handleAddParticipant = (participant: {
+  const handleSave = async (participant: {
     firstName: string;
     lastName: string;
     participation: number;
   }) => {
-    // TODO: Implement API call to add participant
-    console.log("Adding participant:", participant);
-    // Reset form
-    setShowAddForm(false);
-    setTimeout(() => setShowAddForm(true), 100);
+    try {
+      await addParticipant(participant);
+    } catch (error) {
+      console.error("Error adding participant:", error);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    // TODO: Implement API call to delete participant
-    console.log("Deleting participant:", id);
-  };
-
-  const handleCancelAdd = () => {
-    setShowAddForm(false);
-    setTimeout(() => setShowAddForm(true), 100);
+  const handleCancel = () => {
+    router.push("/");
   };
 
   return (
-    <Suspense fallback={<Loading />}>
-      <ParticipantsList
-        onAddParticipant={handleAddParticipant}
-        onDelete={handleDelete}
-        onCancelAdd={handleCancelAdd}
-        showAddForm={showAddForm}
+    <header className="header-main">
+      <ParticipationForm
+        mode="add"
+        onSave={handleSave}
+        onCancel={handleCancel}
       />
-    </Suspense>
+    </header>
   );
 }

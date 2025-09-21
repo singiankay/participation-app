@@ -1,13 +1,11 @@
 "use client";
 
-import { Suspense } from "react";
-import EditParticipant from "@/app/components/EditParticipant";
-import Loading from "@/app/loading";
+import ParticipationForm from "@/app/components/ParticipationForm";
 
 export default function EditPage() {
   return (
-    <Suspense fallback={<Loading />}>
-      <EditParticipant />
-    </Suspense>
+    <header className="header-main">
+      <ParticipationForm mode="edit" onSave={() => {}} onCancel={() => {}} />
+    </header>
   );
 }
