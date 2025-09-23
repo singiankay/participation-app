@@ -29,27 +29,7 @@ export default function EditPage({
     const fetchParticipant = async () => {
       try {
         setLoading(true);
-
-        // Fetch API key first
-        let apiKey = null;
-        try {
-          const keyResponse = await fetch("/api/auth-key");
-          if (keyResponse.ok) {
-            const keyData = await keyResponse.json();
-            apiKey = keyData.apiKey;
-          }
-        } catch (error) {
-          console.error("Failed to fetch API key:", error);
-        }
-
-        const headers: Record<string, string> = {};
-        if (apiKey) {
-          headers["X-API-Key"] = apiKey;
-        }
-
-        const response = await fetch(`/api/participants/${resolvedParams.id}`, {
-          headers,
-        });
+        const response = await fetch(`/api/participants/${resolvedParams.id}`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch participant data");
