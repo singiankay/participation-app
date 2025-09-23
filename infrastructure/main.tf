@@ -14,8 +14,16 @@ provider "neon" {
 
 # Create a project
 resource "neon_project" "participation_app" {
-  name      = "participation-app"
-  region_id = "aws-us-east-1"
+  name                     = "participation-app"
+  region_id                = "aws-us-east-1"
+  history_retention_seconds = 21600
+}
+
+# Create a role for the application
+resource "neon_role" "participation_owner" {
+  project_id = neon_project.participation_app.id
+  name       = "participation_owner"
+  branch_id  = neon_project.participation_app.default_branch_id
 }
 
 # Create a database
@@ -23,30 +31,34 @@ resource "neon_database" "participation_db" {
   project_id = neon_project.participation_app.id
   name       = "participation"
   owner_name = neon_role.participation_owner.name
+  branch_id  = neon_project.participation_app.default_branch_id
 }
 
-# Create a role for the application
-resource "neon_role" "participation_owner" {
-  project_id = neon_project.participation_app.id
-  name       = "participation_owner"
-}
-
-# Create a branch (optional - for development)
-resource "neon_branch" "development" {
-  project_id = neon_project.participation_app.id
-  name       = "development"
-}
-
-# Output the connection string
-output "database_url" {
-  value     = "postgresql://${neon_role.participation_owner.name}:${neon_role.participation_owner.password}@${neon_project.participation_app.hostname}/${neon_database.participation_db.name}?sslmode=require"
-  sensitive = true
-}
-
+# Output basic information
 output "project_id" {
   value = neon_project.participation_app.id
 }
 
-output "hostname" {
-  value = neon_project.participation_app.hostname
+output "database_name" {
+  value = neon_database.participation_db.name
 }
+
+output "role_name" {
+  value = neon_role.participation_owner.name
+}
+
+output "role_password" {
+  value     = neon_role.participation_owner.password
+  sensitive = true
+}
+
+output "database_url" {
+  value     = neon_project.participation_app.connection_uri
+  sensitive = true
+}
+
+output "hostname" {
+  value     = neon_project.participation_app.connection_uri
+  sensitive = true
+}
+

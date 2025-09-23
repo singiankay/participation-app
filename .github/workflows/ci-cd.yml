@@ -1,0 +1,149 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # Continuous Integration - runs on all pushes and PRs
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: participation_app_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+
+      - name: Setup Prisma
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+
+      - name: Run database migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npx tsc --noEmit
+
+      - name: Build application
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+
+  # Continuous Deployment - only runs on main branch after tests pass
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.0"
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./infrastructure
+
+      - name: Terraform Plan
+        run: terraform plan -var="neon_api_key=${{ secrets.NEON_API_KEY }}"
+        working-directory: ./infrastructure
+
+      - name: Terraform Apply
+        run: terraform apply -var="neon_api_key=${{ secrets.NEON_API_KEY }}" -auto-approve
+        working-directory: ./infrastructure
+
+      - name: Get Database URL
+        id: db-url
+        run: |
+          echo "Getting database URL from Terraform..."
+          DATABASE_URL=$(terraform output -raw database_url)
+          echo "Database URL: $DATABASE_URL"
+          echo "url=$DATABASE_URL" >> $GITHUB_OUTPUT
+        working-directory: ./infrastructure
+
+      - name: Debug Database URL
+        run: |
+          echo "Database URL from step output: ${{ steps.db-url.outputs.url }}"
+          if [ -z "${{ steps.db-url.outputs.url }}" ]; then
+            echo "ERROR: Database URL is empty!"
+            exit 1
+          fi
+        working-directory: ./infrastructure
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ steps.db-url.outputs.url }}
+          DIRECT_URL: ${{ steps.db-url.outputs.url }}
+
+      - name: Run Database Migrations
+        run: npm run db:deploy
+        env:
+          DATABASE_URL: ${{ steps.db-url.outputs.url }}
+          DIRECT_URL: ${{ steps.db-url.outputs.url }}
+
+      - name: Build Application
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ steps.db-url.outputs.url }}
+          DIRECT_URL: ${{ steps.db-url.outputs.url }}
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy to Vercel
+        run: |
+          vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --confirm
+        env:
+          DATABASE_URL: ${{ steps.db-url.outputs.url }}
+          DIRECT_URL: ${{ steps.db-url.outputs.url }}
