@@ -26,28 +26,23 @@ export function createAuthMiddleware(config: Partial<AuthConfig> = {}) {
       return null;
     }
 
-    // Comprehensive logging for debugging
-    console.log("🔐 Auth Middleware Debug:", {
-      environment: process.env.NODE_ENV,
-      apiKeysEnv: process.env.API_KEYS ? "SET" : "NOT SET",
-      apiKeysLength: process.env.API_KEYS?.length || 0,
-      apiKeysPreview:
-        process.env.API_KEYS?.substring(0, 20) + "..." || "NOT SET",
-      allowedKeysCount: authConfig.allowedKeys.length,
-      allowedKeysPreview: authConfig.allowedKeys.map(
-        (key) => key.substring(0, 10) + "..."
-      ),
-      requestMethod: request.method,
-      requestUrl: request.url,
-      userAgent: request.headers.get("user-agent")?.substring(0, 50) + "...",
-      referer: request.headers.get("referer"),
-      allHeaders: Object.fromEntries(request.headers.entries()),
-    });
+    // Skip authentication for same-origin requests (frontend)
+    const origin = request.headers.get("origin");
+    const referer = request.headers.get("referer");
+    const isSameOrigin =
+      origin?.includes("participation-app.vercel.app") ||
+      referer?.includes("participation-app.vercel.app");
 
+    if (isSameOrigin) {
+      console.log("Same-origin request, skipping authentication");
+      return null;
+    }
+
+    // For external requests, require API key
     const apiKey = request.headers.get(authConfig.apiKeyHeader);
 
     if (!apiKey) {
-      console.log("❌ No API key provided in request");
+      console.log("No API key provided in external request");
       return NextResponse.json(
         {
           error: "Authentication required",
@@ -57,14 +52,8 @@ export function createAuthMiddleware(config: Partial<AuthConfig> = {}) {
       );
     }
 
-    console.log("🔑 API Key received:", {
-      keyLength: apiKey.length,
-      keyPreview: apiKey.substring(0, 10) + "...",
-      isInAllowedKeys: authConfig.allowedKeys.includes(apiKey),
-    });
-
     if (!authConfig.allowedKeys.includes(apiKey)) {
-      console.log("❌ Invalid API key provided");
+      console.log("Invalid API key provided");
       return NextResponse.json(
         {
           error: "Authentication failed",
@@ -74,8 +63,7 @@ export function createAuthMiddleware(config: Partial<AuthConfig> = {}) {
       );
     }
 
-    console.log("✅ Authentication successful");
-    // Authentication successful
+    console.log("External request authenticated successfully");
     return null;
   };
 }
