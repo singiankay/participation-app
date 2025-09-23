@@ -170,3 +170,4 @@ jobs:
         env:
           DATABASE_URL: ${{ steps.db-url.outputs.url }}
           DIRECT_URL: ${{ steps.db-url.outputs.url }}
+          API_KEYS: ${{ secrets.API_KEYS }}

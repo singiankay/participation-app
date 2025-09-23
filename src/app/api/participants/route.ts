@@ -13,6 +13,7 @@ import {
   createStrictRateLimit,
 } from "@/middleware/rateLimit";
 import { corsMiddleware, applyCorsHeaders } from "@/middleware/cors";
+import { authMiddleware } from "@/middleware/auth";
 
 const getRateLimit = createModerateRateLimit();
 const postRateLimit = createStrictRateLimit();
@@ -22,6 +23,11 @@ export async function GET(request: NextRequest) {
   const corsResponse = corsMiddleware(request);
   if (corsResponse) {
     return corsResponse;
+  }
+
+  const authResponse = authMiddleware(request);
+  if (authResponse) {
+    return authResponse;
   }
 
   const rateLimitResponse = getRateLimit(request);
@@ -69,6 +75,11 @@ export async function POST(request: NextRequest) {
   const corsResponse = corsMiddleware(request);
   if (corsResponse) {
     return corsResponse;
+  }
+
+  const authResponse = authMiddleware(request);
+  if (authResponse) {
+    return authResponse;
   }
 
   const rateLimitResponse = postRateLimit(request);

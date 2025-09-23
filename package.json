@@ -21,7 +21,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "auth:generate-keys": "node scripts/generate-api-keys.js"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
