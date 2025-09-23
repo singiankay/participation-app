@@ -163,14 +163,18 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      # Sync secrets into Vercel project settings
+      # Sync secrets into Vercel project settings (idempotent)
       - name: Sync Env Vars to Vercel
         run: |
-          vercel env add DATABASE_URL production < <(echo "${{ steps.db-url.outputs.url }}")
-          vercel env add DIRECT_URL production < <(echo "${{ steps.db-url.outputs.url }}")
-          vercel env add API_KEYS production < <(echo "${{ secrets.API_KEYS }}")
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # Remove existing variables first (ignore errors if they don't exist)
+          vercel env rm DATABASE_URL production --token ${{ secrets.VERCEL_TOKEN }} --yes || true
+          vercel env rm DIRECT_URL production --token ${{ secrets.VERCEL_TOKEN }} --yes || true
+          vercel env rm API_KEYS production --token ${{ secrets.VERCEL_TOKEN }} --yes || true
+
+          # Add the variables
+          echo "${{ steps.db-url.outputs.url }}" | vercel env add DATABASE_URL production --token ${{ secrets.VERCEL_TOKEN }}
+          echo "${{ steps.db-url.outputs.url }}" | vercel env add DIRECT_URL production --token ${{ secrets.VERCEL_TOKEN }}
+          echo "${{ secrets.API_KEYS }}" | vercel env add API_KEYS production --token ${{ secrets.VERCEL_TOKEN }}
 
       # Deploy to Vercel
       - name: Deploy to Vercel
