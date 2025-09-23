@@ -20,11 +20,16 @@ jest.mock('next/server', () => ({
     }
   },
   NextResponse: {
-    json: (data, init = {}) => ({
-      json: () => Promise.resolve(data),
-      status: init.status || 200,
-      statusText: init.statusText || 'OK',
-    })
+    json: (data, init = {}) => {
+      const response = {
+        json: () => Promise.resolve(data),
+        status: init.status || 200,
+        statusText: init.statusText || 'OK',
+        headers: new Map()
+      }
+      response.headers.set = jest.fn()
+      return response
+    }
   }
 }))
 

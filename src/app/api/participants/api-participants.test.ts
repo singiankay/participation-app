@@ -63,7 +63,10 @@ describe("/api/participants", () => {
         mockParticipants
       );
 
-      const response = await GET();
+      const mockRequest = new NextRequest(
+        "http://localhost:3000/api/participants"
+      );
+      const response = await GET(mockRequest);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -91,7 +94,10 @@ describe("/api/participants", () => {
     it("should return empty array when no participants exist", async () => {
       (mockPrisma.participant.findMany as jest.Mock).mockResolvedValue([]);
 
-      const response = await GET();
+      const mockRequest = new NextRequest(
+        "http://localhost:3000/api/participants"
+      );
+      const response = await GET(mockRequest);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -103,7 +109,10 @@ describe("/api/participants", () => {
         new Error("Database error")
       );
 
-      const response = await GET();
+      const mockRequest = new NextRequest(
+        "http://localhost:3000/api/participants"
+      );
+      const response = await GET(mockRequest);
       const data = await response.json();
 
       expect(response.status).toBe(500);

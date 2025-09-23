@@ -8,9 +8,27 @@ import {
   validateParticipationTotal,
   validateNameUniqueness,
 } from "@/lib/participationValidation";
+import {
+  createModerateRateLimit,
+  createStrictRateLimit,
+} from "@/middleware/rateLimit";
+import { corsMiddleware, applyCorsHeaders } from "@/middleware/cors";
+
+const getRateLimit = createModerateRateLimit();
+const postRateLimit = createStrictRateLimit();
 
 // GET /api/participants - Get all participants
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const corsResponse = corsMiddleware(request);
+  if (corsResponse) {
+    return corsResponse;
+  }
+
+  const rateLimitResponse = getRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const participants = await prisma.participant.findMany({
       orderBy: {
@@ -27,7 +45,17 @@ export async function GET() {
       })
     );
 
-    return NextResponse.json(transformedParticipants);
+    const response = NextResponse.json(transformedParticipants);
+
+    response.headers.set("X-RateLimit-Limit", "30");
+    response.headers.set("X-RateLimit-Remaining", "29");
+    response.headers.set(
+      "X-RateLimit-Reset",
+      new Date(Date.now() + 60000).toISOString()
+    );
+
+    // Apply CORS headers
+    return applyCorsHeaders(response, request);
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch participants" },
@@ -38,6 +66,16 @@ export async function GET() {
 
 // POST /api/participants - Create a new participant
 export async function POST(request: NextRequest) {
+  const corsResponse = corsMiddleware(request);
+  if (corsResponse) {
+    return corsResponse;
+  }
+
+  const rateLimitResponse = postRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const body = await request.json();
     const validation = await validateDto(CreateParticipantDto, body);
@@ -99,7 +137,17 @@ export async function POST(request: NextRequest) {
       participation: participant.participation,
     });
 
-    return NextResponse.json(transformedParticipant, { status: 201 });
+    const response = NextResponse.json(transformedParticipant, { status: 201 });
+
+    response.headers.set("X-RateLimit-Limit", "5");
+    response.headers.set("X-RateLimit-Remaining", "4");
+    response.headers.set(
+      "X-RateLimit-Reset",
+      new Date(Date.now() + 60000).toISOString()
+    );
+
+    // Apply CORS headers
+    return applyCorsHeaders(response, request);
   } catch {
     return NextResponse.json(
       { error: "Failed to create participant" },

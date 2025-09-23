@@ -8,12 +8,31 @@ import {
   validateParticipationTotal,
   validateNameUniqueness,
 } from "@/lib/participationValidation";
+import {
+  createModerateRateLimit,
+  createStrictRateLimit,
+} from "@/middleware/rateLimit";
+import { corsMiddleware, applyCorsHeaders } from "@/middleware/cors";
+
+const getRateLimit = createModerateRateLimit();
+const putRateLimit = createStrictRateLimit();
+const deleteRateLimit = createStrictRateLimit();
 
 // GET /api/participants/[id] - Get a specific participant
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const corsResponse = corsMiddleware(request);
+  if (corsResponse) {
+    return corsResponse;
+  }
+
+  const rateLimitResponse = getRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const resolvedParams = await params;
     const participant = await prisma.participant.findUnique({
@@ -36,7 +55,16 @@ export async function GET(
       participation: participant.participation,
     });
 
-    return NextResponse.json(transformedParticipant);
+    const response = NextResponse.json(transformedParticipant);
+
+    response.headers.set("X-RateLimit-Limit", "30");
+    response.headers.set("X-RateLimit-Remaining", "29");
+    response.headers.set(
+      "X-RateLimit-Reset",
+      new Date(Date.now() + 60000).toISOString()
+    );
+
+    return applyCorsHeaders(response, request);
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch participant" },
@@ -50,6 +78,16 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const corsResponse = corsMiddleware(request);
+  if (corsResponse) {
+    return corsResponse;
+  }
+
+  const rateLimitResponse = putRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const resolvedParams = await params;
     const body = await request.json();
@@ -117,7 +155,16 @@ export async function PUT(
       participation: participant.participation,
     });
 
-    return NextResponse.json(transformedParticipant);
+    const response = NextResponse.json(transformedParticipant);
+
+    response.headers.set("X-RateLimit-Limit", "5");
+    response.headers.set("X-RateLimit-Remaining", "4");
+    response.headers.set(
+      "X-RateLimit-Reset",
+      new Date(Date.now() + 60000).toISOString()
+    );
+
+    return applyCorsHeaders(response, request);
   } catch (error) {
     if (
       typeof error === "object" &&
@@ -141,6 +188,16 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const corsResponse = corsMiddleware(request);
+  if (corsResponse) {
+    return corsResponse;
+  }
+
+  const rateLimitResponse = deleteRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const resolvedParams = await params;
     await prisma.participant.delete({
@@ -149,7 +206,18 @@ export async function DELETE(
       },
     });
 
-    return NextResponse.json({ message: "Participant deleted successfully" });
+    const response = NextResponse.json({
+      message: "Participant deleted successfully",
+    });
+
+    response.headers.set("X-RateLimit-Limit", "5");
+    response.headers.set("X-RateLimit-Remaining", "4");
+    response.headers.set(
+      "X-RateLimit-Reset",
+      new Date(Date.now() + 60000).toISOString()
+    );
+
+    return applyCorsHeaders(response, request);
   } catch (error) {
     if (
       typeof error === "object" &&
