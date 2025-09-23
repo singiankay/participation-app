@@ -39,12 +39,37 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [apiKey, setApiKey] = useState<string | null>(null);
+
+  // Fetch API key for authentication
+  const fetchApiKey = async () => {
+    if (apiKey) return apiKey;
+
+    try {
+      const response = await fetch("/api/auth-key");
+      if (response.ok) {
+        const data = await response.json();
+        setApiKey(data.apiKey);
+        return data.apiKey;
+      }
+    } catch (error) {
+      console.error("Failed to fetch API key:", error);
+    }
+    return null;
+  };
 
   const fetchParticipants = async (isInitial = false) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch("/api/participants");
+
+      const key = await fetchApiKey();
+      const headers: Record<string, string> = {};
+      if (key) {
+        headers["X-API-Key"] = key;
+      }
+
+      const response = await fetch("/api/participants", { headers });
       console.log(`fetching participants`, response);
 
       if (!response.ok) {
@@ -67,11 +92,17 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
     participant: Omit<Participant, "id">
   ): Promise<boolean> => {
     try {
+      const key = await fetchApiKey();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (key) {
+        headers["X-API-Key"] = key;
+      }
+
       const response = await fetch("/api/participants", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(participant),
       });
 
@@ -106,11 +137,17 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
     participant: Omit<Participant, "id">
   ): Promise<boolean> => {
     try {
+      const key = await fetchApiKey();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (key) {
+        headers["X-API-Key"] = key;
+      }
+
       const response = await fetch(`/api/participants/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(participant),
       });
 
@@ -148,8 +185,15 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
         ? `${participantToDelete.firstName} ${participantToDelete.lastName}`
         : "Participant";
 
+      const key = await fetchApiKey();
+      const headers: Record<string, string> = {};
+      if (key) {
+        headers["X-API-Key"] = key;
+      }
+
       const response = await fetch(`/api/participants/${id}`, {
         method: "DELETE",
+        headers,
       });
 
       if (!response.ok) {
@@ -169,7 +213,7 @@ export function ParticipantsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchParticipants(true); // Mark as initial load
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value: ParticipantsContextType = {
     participants,
