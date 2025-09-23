@@ -33,19 +33,7 @@ npm install
 1. Sign up at [neon.tech](https://neon.tech)
 2. Create a new project
 3. Get your API key from the dashboard
-4. Copy `infrastructure/terraform.tfvars.example` to `infrastructure/terraform.tfvars`
-5. Fill in your Neon API key:
-
-```bash
-cp infrastructure/terraform.tfvars.example infrastructure/terraform.tfvars
-```
-
-Edit `infrastructure/terraform.tfvars`:
-
-```
-neon_api_key = "your_neon_api_key_here"
-environment  = "production"
-```
+4. Add your Neon API key to GitHub Secrets (see GitHub Actions setup below)
 
 ### 3. Provision Infrastructure with Terraform
 
