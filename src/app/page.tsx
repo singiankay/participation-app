@@ -13,11 +13,7 @@ export default function Home() {
     lastName: string;
     participation: number;
   }) => {
-    const success = await addParticipant(participant);
-    if (success) {
-      // Optionally redirect or show success message
-      // The toast notification is already handled in the context
-    }
+    await addParticipant(participant);
   };
 
   const handleCancel = () => {

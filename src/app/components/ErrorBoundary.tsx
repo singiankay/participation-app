@@ -22,10 +22,6 @@ export default function ErrorBoundary({
   redirectDelay = 5000,
 }: ErrorBoundaryProps) {
   useEffect(() => {
-    // Log the error to an error reporting service
-    console.error(error);
-
-    // Auto-redirect after delay
     const timer = setTimeout(() => {
       window.location.href = redirectPath;
     }, redirectDelay);

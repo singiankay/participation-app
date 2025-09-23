@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { CreateParticipantDto } from "@/dto/CreateParticipantDto";
+import { ParticipantResponseDto } from "@/dto/ParticipantResponseDto";
 import { validateDto } from "@/lib/validation";
+import { plainToClass } from "class-transformer";
 import {
   validateParticipationTotal,
   validateNameUniqueness,
@@ -16,17 +18,17 @@ export async function GET() {
       },
     });
 
-    // Transform the data to match the frontend interface
-    const transformedParticipants = participants.map((participant) => ({
-      id: participant.id,
-      firstName: participant.firstname,
-      lastName: participant.lastname,
-      participation: participant.participation,
-    }));
+    const transformedParticipants = participants.map((participant) =>
+      plainToClass(ParticipantResponseDto, {
+        id: participant.id,
+        firstName: participant.firstname,
+        lastName: participant.lastname,
+        participation: participant.participation,
+      })
+    );
 
     return NextResponse.json(transformedParticipants);
-  } catch (error) {
-    console.error("Error fetching participants:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch participants" },
       { status: 500 }
@@ -38,8 +40,6 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-
-    // Validate the request data
     const validation = await validateDto(CreateParticipantDto, body);
 
     if (!validation.isValid) {
@@ -53,8 +53,6 @@ export async function POST(request: NextRequest) {
     }
 
     const validatedData = validation.data!;
-
-    // Validate name uniqueness
     const uniquenessValidation = await validateNameUniqueness(
       validatedData.firstName,
       validatedData.lastName
@@ -70,7 +68,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate that total participation doesn't exceed 100%
     const participationValidation = await validateParticipationTotal(
       validatedData.participation
     );
@@ -95,17 +92,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Transform the response to match the frontend interface
-    const transformedParticipant = {
+    const transformedParticipant = plainToClass(ParticipantResponseDto, {
       id: participant.id,
       firstName: participant.firstname,
       lastName: participant.lastname,
       participation: participant.participation,
-    };
+    });
 
     return NextResponse.json(transformedParticipant, { status: 201 });
-  } catch (error) {
-    console.error("Error creating participant:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to create participant" },
       { status: 500 }

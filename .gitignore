@@ -44,12 +44,19 @@ infrastructure/terraform.tfstate*
 *.tsbuildinfo
 next-env.d.ts
 
+# prisma
+/src/generated/prisma
+
+# playwright
+playwright-report
+test-results
+
 #project specific
 requirements/
 
-/src/generated/prisma
-
-# amplify
-.amplify
-amplify_outputs*
-amplifyconfiguration*
+# Playwright
+node_modules/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

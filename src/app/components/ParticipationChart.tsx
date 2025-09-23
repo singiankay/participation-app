@@ -39,8 +39,6 @@ const COLORS = [
 
 export default function ParticipationChart() {
   const { participants, loading } = useParticipants();
-
-  // Prepare data for pie chart
   const totalParticipation =
     participants?.reduce((sum, p) => sum + p.participation, 0) || 0;
 
@@ -58,7 +56,6 @@ export default function ParticipationChart() {
     });
   }
 
-  // Custom tooltip
   const CustomTooltip = ({
     active,
     payload,

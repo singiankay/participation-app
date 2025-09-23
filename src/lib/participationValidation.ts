@@ -53,8 +53,7 @@ export async function validateParticipationTotal(
       currentTotal,
       newTotal,
     };
-  } catch (error) {
-    console.error("Error validating participation total:", error);
+  } catch {
     return {
       isValid: false,
       currentTotal: 0,
@@ -93,8 +92,7 @@ export async function validateNameUniqueness(
     return {
       isValid: true,
     };
-  } catch (error) {
-    console.error("Error validating name uniqueness:", error);
+  } catch {
     return {
       isValid: false,
       error: "Failed to validate name uniqueness",

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { UpdateParticipantDto } from "@/dto/UpdateParticipantDto";
+import { ParticipantResponseDto } from "@/dto/ParticipantResponseDto";
 import { validateDto } from "@/lib/validation";
+import { plainToClass } from "class-transformer";
 import {
   validateParticipationTotal,
   validateNameUniqueness,
@@ -27,17 +29,15 @@ export async function GET(
       );
     }
 
-    // Transform the data to match the frontend interface
-    const transformedParticipant = {
+    const transformedParticipant = plainToClass(ParticipantResponseDto, {
       id: participant.id,
       firstName: participant.firstname,
       lastName: participant.lastname,
       participation: participant.participation,
-    };
+    });
 
     return NextResponse.json(transformedParticipant);
-  } catch (error) {
-    console.error("Error fetching participant:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch participant" },
       { status: 500 }
@@ -67,8 +67,6 @@ export async function PUT(
     }
 
     const validatedData = validation.data!;
-
-    // Validate name uniqueness (excluding current participant)
     const uniquenessValidation = await validateNameUniqueness(
       validatedData.firstName,
       validatedData.lastName,
@@ -85,7 +83,6 @@ export async function PUT(
       );
     }
 
-    // Validate that total participation doesn't exceed 100%
     const participationValidation = await validateParticipationTotal(
       validatedData.participation,
       resolvedParams.id
@@ -113,14 +110,12 @@ export async function PUT(
         }))(validatedData),
       },
     });
-
-    // Transform the response to match the frontend interface
-    const transformedParticipant = {
+    const transformedParticipant = plainToClass(ParticipantResponseDto, {
       id: participant.id,
       firstName: participant.firstname,
       lastName: participant.lastname,
       participation: participant.participation,
-    };
+    });
 
     return NextResponse.json(transformedParticipant);
   } catch (error) {
@@ -136,7 +131,6 @@ export async function PUT(
       );
     }
 
-    console.error("Error updating participant:", error);
     return NextResponse.json(
       { error: "Failed to update participant" },
       { status: 500 }
@@ -168,7 +162,6 @@ export async function DELETE(
         { status: 404 }
       );
     }
-    console.error("Error deleting participant:", error);
     return NextResponse.json(
       { error: "Failed to delete participant" },
       { status: 500 }

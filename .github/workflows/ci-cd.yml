@@ -60,11 +60,34 @@ jobs:
       - name: Run type checking
         run: npx tsc --noEmit
 
+      - name: Run unit tests
+        run: npm test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+
       - name: Build application
         run: npm run build
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
           DIRECT_URL: postgresql://postgres:postgres@localhost:5432/participation_app_test
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
 
   # Continuous Deployment - only runs on main branch after tests pass
   deploy:

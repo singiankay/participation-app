@@ -23,7 +23,6 @@ export default function EditPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Unwrap the params Promise
   const resolvedParams = use(params);
 
   useEffect(() => {
@@ -58,10 +57,8 @@ export default function EditPage({
       updatedParticipant
     );
     if (success) {
-      // Only redirect on successful update
       router.push("/");
     }
-    // If not successful, stay on the page to show the error
   };
 
   const handleCancel = () => {
