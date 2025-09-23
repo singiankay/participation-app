@@ -10,3 +10,9 @@ variable "environment" {
   type        = string
   default     = "production"
 }
+
+variable "existing_project_id" {
+  description = "ID of existing Neon project to use (leave empty to create new)"
+  type        = string
+  default     = null
+}
