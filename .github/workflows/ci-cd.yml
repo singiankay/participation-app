@@ -166,10 +166,7 @@ jobs:
 
       - name: Deploy to Vercel
         run: |
-          vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --confirm \
-          -e DATABASE_URL=${{ steps.db-url.outputs.url }} \
-          -e DIRECT_URL=${{ steps.db-url.outputs.url }} \
-          -e API_KEYS=${{ secrets.API_KEYS }}
+          vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --confirm
         env:
           DATABASE_URL: ${{ steps.db-url.outputs.url }}
           DIRECT_URL: ${{ steps.db-url.outputs.url }}
